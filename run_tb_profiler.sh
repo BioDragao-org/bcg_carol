@@ -57,5 +57,8 @@ tb-profiler profile -1 8BCG_S91_R1_001.p.fastq.gz -2 8BCG_S91_R2_001.p.fastq.gz 
 echo "9BCG_S8_R1_001"
 tb-profiler profile -1 9BCG_S8_R1_001.p.fastq.gz -2 9BCG_S8_R2_001.p.fastq.gz -t 4 -p 9BCG
 
+
+#==========================================
+
 echo "Concatenating results"
 cat ./results/* > ./results/BCG.results.json
