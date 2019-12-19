@@ -10,8 +10,8 @@ params.genomeName = "G04868_L003"
 //====== gzip decompress ============
 // DONE
 
-/*
-gzippedFilePairsCh = Channel.fromFilePairs('G04868_L003_R{1,2}.fastq.gz')
+
+gzippedFilePairsCh = Channel.fromFilePairs('*_R{1,2}.*.fastq.gz')
 
 
 process gzipDecompressFiles {
@@ -26,19 +26,22 @@ process gzipDecompressFiles {
 
     for (int i = 0; i < fileList.size(); i++) {
         oldR1Name = fileList[i + 1][0]
-        newR1Name = oldR1Name.toString().split("\\.")[0]
+        newR1Name = oldR1Name.toString().split("\\.")[0..1].join(".")
 
         oldR2Name = fileList[i + 1][1]
-        newR2Name = oldR2Name.toString().split("\\.")[0]
+        newR2Name = oldR2Name.toString().split("\\.")[0..1].join(".")
 
         return """
-            gzip -dc ${oldR1Name} > ${newR1Name}.fastq
 
-            gzip -dc ${oldR2Name} > ${newR2Name}.fastq
+echo ${oldR1Name}
+echo ${newR1Name}
+            #gzip -dc ${oldR1Name} > ${newR1Name}.fastq
+
+            #gzip -dc ${oldR2Name} > ${newR2Name}.fastq
             """
     }
 }
-*/
+
 
 
 //====== trimmomatic ============
