@@ -31,13 +31,14 @@ process gzipDecompressFiles {
         oldR2Name = fileList[i + 1][1]
         newR2Name = oldR2Name.toString().split("\\.")[0..1].join(".")
 
+            // gzip -dc ${oldR1Name} > ${newR1Name}.fastq
+            // gzip -dc ${oldR2Name} > ${newR2Name}.fastq
+
         return """
 
 echo ${oldR1Name}
 echo ${newR1Name}
-            #gzip -dc ${oldR1Name} > ${newR1Name}.fastq
 
-            #gzip -dc ${oldR2Name} > ${newR2Name}.fastq
             """
     }
 }
@@ -111,65 +112,65 @@ process bwaIndexReferenceGenome {
 
 */
 
-//======= tb-profiler =======
-// DONE
+// //======= tb-profiler =======
+// // DONE
 
-// TODO nextflow seems to consider this output as an error but it actually works fine
-
-
-fastqFilePairsCh = Channel.fromFilePairs('G04868_L003_R{1,2}_trimmed_paired.fastq')
-referenceGenomeCh = Channel.fromPath("./NC000962_3.fasta")
+// // TODO nextflow seems to consider this output as an error but it actually works fine
 
 
-process mapAndGenerateSamFile {
-//    conda 'bwa'
-//    conda './tese.yaml'
-
-    echo true
-//    errorStrategy 'ignore'
-
-    input:
-    val refGenome from referenceGenomeCh
-    val fastqFiles from fastqFilePairsCh
-
-    output:
-    file "G04868_L003.sam" into samFileCh
-
-    script:
-
-    samFileName = fastqFiles[1][0].toString().split("\\.")[0].split("\\_")[0] + "_" + fastqFiles[1][0].toString().split("\\.")[0].split("\\_")[1] + ".sam"
-    fastqPairedFile1 = fastqFiles[1][0]
-    fastqPairedFile2 = fastqFiles[1][1]
-
-    """
-
-    bwa mem -R "@RG\\tID:G04868\\tSM:G04868\\tPL:Illumina" -M ${refGenome} ${fastqPairedFile1} ${fastqPairedFile2} > G04868_L003.sam
-
-    """
-}
+// fastqFilePairsCh = Channel.fromFilePairs('G04868_L003_R{1,2}_trimmed_paired.fastq')
+// referenceGenomeCh = Channel.fromPath("./NC000962_3.fasta")
 
 
-//======== rdanalyzer =======
-// DONE
+// process mapAndGenerateSamFile {
+// //    conda 'bwa'
+// //    conda './tese.yaml'
 
-referenceGenomeFaiCh = Channel.fromPath('./NC000962_3.fasta.fai')
-//samFileCh = Channel.fromPath("./G04868_L003.sam")
+//     echo true
+// //    errorStrategy 'ignore'
 
-process convertSamFileToBamFile {
-//    conda 'bwa'
-//    conda './tese.yaml'
+//     input:
+//     val refGenome from referenceGenomeCh
+//     val fastqFiles from fastqFilePairsCh
 
-    echo true
+//     output:
+//     file "G04868_L003.sam" into samFileCh
 
-    input:
-    val samFile from samFileCh
+//     script:
+
+//     samFileName = fastqFiles[1][0].toString().split("\\.")[0].split("\\_")[0] + "_" + fastqFiles[1][0].toString().split("\\.")[0].split("\\_")[1] + ".sam"
+//     fastqPairedFile1 = fastqFiles[1][0]
+//     fastqPairedFile2 = fastqFiles[1][1]
+
+//     """
+
+//     bwa mem -R "@RG\\tID:G04868\\tSM:G04868\\tPL:Illumina" -M ${refGenome} ${fastqPairedFile1} ${fastqPairedFile2} > G04868_L003.sam
+
+//     """
+// }
 
 
-    script:
+// //======== rdanalyzer =======
+// // DONE
 
-    bamFile = samFile.toString().split("\\.")[0] + ".bam"
+// referenceGenomeFaiCh = Channel.fromPath('./NC000962_3.fasta.fai')
+// //samFileCh = Channel.fromPath("./G04868_L003.sam")
 
-    """
-python2.7 rdanalyzer.py -o 59BCG 59BCG_S24_R1.p.fastq
-    """
-}
+// process convertSamFileToBamFile {
+// //    conda 'bwa'
+// //    conda './tese.yaml'
+
+//     echo true
+
+//     input:
+//     val samFile from samFileCh
+
+
+//     script:
+
+//     bamFile = samFile.toString().split("\\.")[0] + ".bam"
+
+//     """
+// python2.7 rdanalyzer.py -o 59BCG 59BCG_S24_R1.p.fastq
+//     """
+// }
