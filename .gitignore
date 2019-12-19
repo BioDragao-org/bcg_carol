@@ -1,2 +1,6 @@
 *fastq
+*fastq.gz
 *fasta
+/bam
+/results
+/vcf
