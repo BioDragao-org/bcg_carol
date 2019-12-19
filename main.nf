@@ -84,7 +84,7 @@ process trimmomatic {
 }
 */
 
-//====== bwa index ============
+//====== spotyping ============
 // DONE
 /*
 
@@ -102,39 +102,13 @@ process bwaIndexReferenceGenome {
     script:
 
     """
-    bwa index ${refGenome}
+ python2.7 SpoTyping.py ./10BCG_S20_R2_001.p.fastq -o 10BCG.txt
     """
 }
 
 */
 
-//======== samtools_faidx_reference_genome =======
-// DONE
-
-/*
-
-referenceGenome = Channel.fromPath("./NC000962_3.fasta")
-
-process samtoolsFaidxReferenceGenome {
-//    conda 'bwa'
-//    conda './tese.yaml'
-
-    echo true
-
-    input:
-    val refGenome from referenceGenome
-
-    script:
-
-    """
-    samtools faidx  ${refGenome}
-    """
-}
-
-*/
-
-
-//======= map_and_generate_sam_file =======
+//======= tb-profiler =======
 // DONE
 
 // TODO nextflow seems to consider this output as an error but it actually works fine
@@ -167,12 +141,12 @@ process mapAndGenerateSamFile {
     """
 
     bwa mem -R "@RG\\tID:G04868\\tSM:G04868\\tPL:Illumina" -M ${refGenome} ${fastqPairedFile1} ${fastqPairedFile2} > G04868_L003.sam
-    
+
     """
 }
 
 
-//======== convert_sam_file_to_bam_file =======
+//======== rdanalyzer =======
 // DONE
 
 referenceGenomeFaiCh = Channel.fromPath('./NC000962_3.fasta.fai')
@@ -185,7 +159,6 @@ process convertSamFileToBamFile {
     echo true
 
     input:
-    val referenceGenomeFai from referenceGenomeFaiCh
     val samFile from samFileCh
 
 
@@ -194,7 +167,6 @@ process convertSamFileToBamFile {
     bamFile = samFile.toString().split("\\.")[0] + ".bam"
 
     """
-
-    samtools view -bt ${referenceGenomeFai} ${samFile} > ${bamFile}
+python2.7 rdanalyzer.py -o 59BCG 59BCG_S24_R1.p.fastq
     """
 }
