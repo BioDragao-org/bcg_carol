@@ -31,13 +31,10 @@ process gzipDecompressFiles {
         oldR2Name = fileList[i + 1][1]
         newR2Name = oldR2Name.toString().split("\\.")[0..1].join(".")
 
-            // gzip -dc ${oldR1Name} > ${newR1Name}.fastq
-            // gzip -dc ${oldR2Name} > ${newR2Name}.fastq
-
         return """
 
-echo ${oldR1Name}
-echo ${newR1Name}
+echo gzip -dc ${oldR1Name} > ${newR1Name}.fastq
+echo gzip -dc ${oldR2Name} > ${newR2Name}.fastq
 
             """
     }
