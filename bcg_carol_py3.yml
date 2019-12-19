@@ -1,4 +1,4 @@
-name: base
+name: bcg_carol_py3
 channels:
   - conda-forge
   - bioconda
