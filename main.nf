@@ -33,8 +33,8 @@ process gzipDecompressFiles {
 
         return """
 
-echo gzip -dc ${oldR1Name} > ${newR1Name}.fastq
-echo gzip -dc ${oldR2Name} > ${newR2Name}.fastq
+gzip -dc ${oldR1Name} > ${newR1Name}.fastq
+gzip -dc ${oldR2Name} > ${newR2Name}.fastq
 
             """
     }
