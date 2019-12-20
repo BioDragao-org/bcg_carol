@@ -1,3 +1,5 @@
+#!/usr/bin/env pwsh
+
 #bcg_carol_batch2_19122019
 
 rclone copy ./tbprofiler.dr.indiv.itol.txt  onedrive-ab-uopeople:/bcg_carol_batch2_19122019/ -v
