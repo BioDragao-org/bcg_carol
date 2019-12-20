@@ -260,3 +260,6 @@ python2.7 rdanalyzer.py -o CBCG CBCG_S34_R1_001.p.fastq
 python2.7 rdanalyzer.py -o Moreau Moreau_1.p.fastq
 #Moreau_2.p.fastq.gz
 
+#===================================
+
+cat 10BCG.result 11BCG.result 12BCG.result 13BCG.result 14BCG.result 16BCG.result 17BCG.result 18BCG.result 19BCG.result 1BCG.result 20BCG.result 21BCG.result 22BCG.result 23BCG.result 24BCG.result 25BCG.result 26BCG.result 27BCG.result 29BCG.result 2BCG.result 30BCG.result 31BCG.result 33BCG.result 34BCG.result 35BCG.result 36BCG.result 37BCG.result 3BCG.result 43BCG.result 49BCG.result 50BCG.result 51BCG.result 52BCG.result 53BCG.result 56BCG.result 57BCG.result 58BCG.result 59BCG.result 5BCG.result 60BCG.result 61BCG.result 6BCG.result 7BCG.result 8BCG.result 9BCG.result ABCG.result BBCG.result CBCG.result Moreau.result >> rdanalyzer_concatenated_result.txt
