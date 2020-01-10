@@ -94,3 +94,8 @@ vagrant ssh -c "cd /vagrant/lab/bcg_carol && kvarq scan -l MTBC -p BBCG_S22_R1_0
 vagrant ssh -c "cd /vagrant/lab/bcg_carol && kvarq scan -l MTBC -p BBCG_S22_R2_001.p.fastq.gz BBCG_S22_R2_001.json"
 vagrant ssh -c "cd /vagrant/lab/bcg_carol && kvarq scan -l MTBC -p CBCG_S34_R1_001.p.fastq.gz CBCG_S34_R1_001.json"
 vagrant ssh -c "cd /vagrant/lab/bcg_carol && kvarq scan -l MTBC -p CBCG_S34_R2_001.p.fastq.gz CBCG_S34_R2_001.json"
+vagrant ssh -c "cd /vagrant/lab/bcg_carol && kvarq scan -l MTBC -p Moreau_1.p.fastq.gz Moreau_1.json"
+vagrant ssh -c "cd /vagrant/lab/bcg_carol && kvarq scan -l MTBC -p Moreau_2.p.fastq.gz Moreau_2.json"
+
+#===============================
+vagrant ssh -c "cd /vagrant/lab/bcg_carol && kvarq summarize results/*.json > kvarq_results.csv"
