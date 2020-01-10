@@ -173,4 +173,6 @@ tb-profiler profile -1 Moreau_1.p.fastq.gz -2 Moreau_2.p.fastq.gz -t 4 -p Moreau
 echo "Concatenating results"
 cat ./results/* > ./results/BCG.results.json
 
+# the official recommendation to collate data
+tb-profiler collate
 
