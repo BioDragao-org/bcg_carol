@@ -1,173 +1,129 @@
-//====== genome files needed ============
-// NOTE
+#!/usr/bin/env nextflow
 
-//====== nf pipeline parameters ============
-
-params.genomeName = "G04868_L003"
-// params.refGenomeFasta = "NC000962_3.fasta"
-// params.refGenomeGbk = "NC000962_3.gbk"
-
-//====== gzip decompress ============
-// DONE
-
-
-gzippedFilePairsCh = Channel.fromFilePairs('*_R{1,2}.*.fastq.gz')
-
-
-process gzipDecompressFiles {
-
-    echo true
-
-    input:
-
-    val fileList from gzippedFilePairsCh
-
-    script:
-
-    for (int i = 0; i < fileList.size(); i++) {
-        oldR1Name = fileList[i + 1][0]
-        newR1Name = oldR1Name.toString().split("\\.")[0..1].join(".")
-
-        oldR2Name = fileList[i + 1][1]
-        newR2Name = oldR2Name.toString().split("\\.")[0..1].join(".")
-
-        return """
-
-gzip -dc ${oldR1Name} > ${newR1Name}.fastq
-gzip -dc ${oldR2Name} > ${newR2Name}.fastq
-
-            """
-    }
-}
-
-
-
-//====== trimmomatic ============
-// DONE
 
 /*
-fastqFilePairsCh = Channel.fromFilePairs('G04868_L003_R{1,2}.fastq.gz')
-
-
-process trimmomatic {
-
-    echo true
-
-    input:
-
-    val fileList from fastqFilePairsCh
-
-
-    script:
-
-    for (int i = 0; i < fileList.size(); i++) {
-        oldR1Name = fileList[i + 1][0]
-        newR1Paired = oldR1Name.toString().split("\\.")[0] + "_trimmed_paired.fastq"
-        newR1Unpaired = oldR1Name.toString().split("\\.")[0] + "_trimmed_unpaired.fastq"
-
-        oldR2Name = fileList[i + 1][1]
-        newR2Paired = oldR2Name.toString().split("\\.")[0] + "_trimmed_paired.fastq"
-        newR2Unpaired = oldR2Name.toString().split("\\.")[0] + "_trimmed_unpaired.fastq"
-
-
-        return """
-            java -jar /opt/Trimmomatic-0.36/trimmomatic-0.36.jar PE  -phred33  \
-            ${oldR1Name}  \
-            ${oldR2Name}  \
-            ${newR1Paired}  \
-            ${newR1Unpaired}  \
-            ${newR2Paired}  \
-            ${newR2Unpaired} \
-            LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36
-
-            """
-    }
-}
+################
+NEXTFLOW Global Config
+################
 */
 
-//====== spotyping ============
-// DONE
+params.outdir = "results"
+ch_refGbk = Channel.value("$baseDir/NC000962_3.gbk")
+ch_refFasta = Channel.value("$baseDir/NC000962_3.fasta")
+
+Channel.fromFilePairs("./*_{R1,R2}.fastq.gz", flat: true)
+        .into { ch_fastqGz; ch_snippy; ch_tbProfiler }
+
+
 /*
+#==============================================
+# gzip
+#==============================================
+*/
 
-referenceGenomeCh = Channel.fromPath("./NC000962_3.fasta")
 
-process bwaIndexReferenceGenome {
-//    conda 'bwa'
-//    conda './tese.yaml'
-
-    echo true
+process gzip {
+    container 'centos:8'
 
     input:
-    val refGenome from referenceGenomeCh
+    tuple genomeName, path(read_1_gz), path(read_2_gz) from ch_fastqGz
+
+    output:
+    tuple genomeName, path(genome_1_fq), path(genome_2_fq) into ch_trimmomatic
+    tuple genomeName, path(genome_1_fq), path(genome_2_fq) into ch_in_rdAnalyzer
+    tuple genomeName, path(genome_1_fq), path(genome_2_fq) into ch_in_spades
+
+    script:
+    genome_1_fq = read_1_gz.name.split("\\.")[0] + '.fastq'
+    genome_2_fq = read_2_gz.name.split("\\.")[0] + '.fastq'
+    """
+    gzip -dc -k ${read_1_gz} > ${genome_1_fq} 
+    gzip -dc -k ${read_2_gz} > ${genome_2_fq}
+    """
+
+}
+
+/*
+#==============================================
+# TB_Profiler
+#==============================================
+*/
+
+
+process tbProfiler {
+
+    container 'quay.io/biocontainers/tb-profiler:2.8.6--pypy_0'
+
+    input:
+    tuple (genomeName, path(read_1_gz), path(read_2_gz)) from ch_tbProfiler
 
     script:
 
     """
- python2.7 SpoTyping.py ./10BCG_S20_R2_001.p.fastq -o 10BCG.txt
+    tb-profiler profile -1 $read_1_gz -2 $read_2_gz  -t 4 -p $genomeName
     """
 }
 
+/*
+#==============================================
+# RD_Analyzer
+#==============================================
 */
 
-// //======= tb-profiler =======
-// // DONE
+process rdAnalyzer {
+    container 'abhi18av/rdanalyzer'
 
-// // TODO nextflow seems to consider this output as an error but it actually works fine
+    input:
+    tuple genomeName, path(fq_1), path(fq_2) from ch_in_rdAnalyzer
 
+    script:
 
-// fastqFilePairsCh = Channel.fromFilePairs('G04868_L003_R{1,2}_trimmed_paired.fastq')
-// referenceGenomeCh = Channel.fromPath("./NC000962_3.fasta")
+    """
+    python  /RD-Analyzer/RD-Analyzer.py  -o ./${genomeName}_rdanalyzer ${fq_1} ${fq_2}
 
-
-// process mapAndGenerateSamFile {
-// //    conda 'bwa'
-// //    conda './tese.yaml'
-
-//     echo true
-// //    errorStrategy 'ignore'
-
-//     input:
-//     val refGenome from referenceGenomeCh
-//     val fastqFiles from fastqFilePairsCh
-
-//     output:
-//     file "G04868_L003.sam" into samFileCh
-
-//     script:
-
-//     samFileName = fastqFiles[1][0].toString().split("\\.")[0].split("\\_")[0] + "_" + fastqFiles[1][0].toString().split("\\.")[0].split("\\_")[1] + ".sam"
-//     fastqPairedFile1 = fastqFiles[1][0]
-//     fastqPairedFile2 = fastqFiles[1][1]
-
-//     """
-
-//     bwa mem -R "@RG\\tID:G04868\\tSM:G04868\\tPL:Illumina" -M ${refGenome} ${fastqPairedFile1} ${fastqPairedFile2} > G04868_L003.sam
-
-//     """
-// }
+    """
+}
 
 
-// //======== rdanalyzer =======
-// // DONE
-
-// referenceGenomeFaiCh = Channel.fromPath('./NC000962_3.fasta.fai')
-// //samFileCh = Channel.fromPath("./G04868_L003.sam")
-
-// process convertSamFileToBamFile {
-// //    conda 'bwa'
-// //    conda './tese.yaml'
-
-//     echo true
-
-//     input:
-//     val samFile from samFileCh
+/*
+###############
+Spotyping
+###############
+*/
 
 
-//     script:
 
-//     bamFile = samFile.toString().split("\\.")[0] + ".bam"
+process spotyping {
+    container 'abhi18av/spotyping'
 
-//     """
-// python2.7 rdanalyzer.py -o 59BCG 59BCG_S24_R1.p.fastq
-//     """
-// }
+    input:
+    tuple genomeName, path(fq_1_paired) from ch_in_spotyping
+
+    script:
+
+    """
+    python /SpoTyping-v2.0/SpoTyping-v2.0-commandLine/SpoTyping.py ./${fq_1_paired} -o ${genomeName}.txt
+    """
+}
+
+/*
+###############
+Upload the results
+###############
+*/
+
+
+
+process upload {
+    container 'abhi18av/biodragao_base'
+
+    input:
+    tuple genomeName, path(fq_1_paired) from ch_in_spotyping
+
+    script:
+
+    """
+    """
+}
+
+
